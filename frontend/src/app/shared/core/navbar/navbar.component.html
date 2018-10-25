@@ -1,0 +1,36 @@
+<nav class="navbar navbar-expand-lg navbar-light bg-light shadow">
+  <a class="navbar-brand" routerLink="/">
+    PythonGames
+  </a>
+  <button type="button" class="btn btn-outline-primary d-lg-none float-right" (click)="isCollapsed = !isCollapsed"
+          [attr.aria-expanded]="!isCollapsed" aria-controls="navbarContent">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+
+  <div class="collapse navbar-collapse" id="navbarContent" [ngbCollapse]="isCollapsed">
+    <ul class="navbar-nav mr-auto">
+      <li class="nav-item" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
+        <a class="nav-link" routerLink="/">Home</a>
+      </li>
+      <li class="nav-item" ngbDropdown *ngIf="isAuthenticated" routerLinkActive="active">
+        <a class="nav-link" ngbDropdownToggle id="navbarDropdown" role="button" data-toggle="dropdown"
+           aria-haspopup="true" aria-expanded="false">
+          Games
+        </a>
+        <div ngbDropdownMenu aria-labelledby="navbarDropdown">
+          <a class="dropdown-item" routerLink="/tetris" routerLinkActive="active">Tetris</a>
+        </div>
+      </li>
+      <li class="nav-item" *ngIf="isAuthenticated" routerLinkActive="active">
+        <a class="nav-link" routerLink="/statistics">Statistics</a>
+      </li>
+    </ul>
+    <div class="float-right">
+      <button mat-raised-button *ngIf="!isAuthenticated" color="primary" routerLink="/login">Login</button>
+      <div class="d-inline-flex" *ngIf="isAuthenticated">
+        <span class="welcome">Hello {{ user.name }}!</span>
+        <button mat-raised-button color="primary" (click)="logout()">Logout</button>
+      </div>
+    </div>
+  </div>
+</nav>
