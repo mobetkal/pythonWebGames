@@ -1,6 +1,4 @@
-import { Component, OnInit } from '@angular/core';
-
-import { User } from '../../models/user.model';
+import { Component, DoCheck } from '@angular/core';
 
 import { AuthenticationService } from '../../authentication/authentication.service';
 
@@ -9,18 +7,19 @@ import { AuthenticationService } from '../../authentication/authentication.servi
   templateUrl: './navbar.component.html',
   styleUrls: ['./navbar.component.css']
 })
-export class NavbarComponent implements OnInit {
+export class NavbarComponent implements DoCheck {
   isAuthenticated = false;
-  user: User = new User('Marcin');
+  displayName = '';
   isCollapsed = true;
 
   constructor(private authService: AuthenticationService) { }
 
-  ngOnInit() {
-    this.isAuthenticated = this.authService.isAuthenticated();
-  }
-
   logout() {
     this.authService.logout();
+  }
+
+  ngDoCheck() {
+    this.isAuthenticated = this.authService.isAuthenticated();
+    this.displayName = this.authService.getUserName();
   }
 }

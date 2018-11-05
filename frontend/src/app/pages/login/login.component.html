@@ -1,3 +1,51 @@
-<p>
-  login works!
-</p>
+<div class="container-fluid">
+  <div class="row">
+    <div class="login-form-container col-12 d-flex align-items-center justify-content-center">
+      <div class="login-form text-center">
+        <div class="login-title">
+          <h2 class="white">Login Account</h2>
+        </div>
+
+        <div class="card border-danger login-error-card" *ngIf="loginError !== ''">
+          <div class="text-danger">
+            <p class="card-text">{{ loginError }}</p>
+          </div>
+        </div>
+
+        <form [formGroup]="signInForm" (ngSubmit)="onSubmit()">
+
+          <div class="col-md-12">
+            <mat-form-field class="full-width">
+              <input matInput required
+                     formControlName="login"
+                     placeholder="Login">
+            </mat-form-field>
+          </div>
+
+          <div class="col-md-12">
+            <mat-form-field class="full-width">
+              <input matInput required
+                     formControlName="password"
+                     placeholder="Password"
+                     type="password">
+            </mat-form-field>
+          </div>
+
+          <div class="col-md-12 login-action">
+            <div class="float-right d-inline-flex">
+              <mat-spinner [diameter]="27"
+                           *ngIf="loading"
+                           class="progress-spinner"></mat-spinner>
+              <button mat-flat-button type="submit" [disabled]="loading">Sign In</button>
+            </div>
+          </div>
+
+        </form>
+        <div class="register">
+          Don't have an account?&nbsp;
+          <a class="signup-link" routerLink="/register">SIGN UP</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
