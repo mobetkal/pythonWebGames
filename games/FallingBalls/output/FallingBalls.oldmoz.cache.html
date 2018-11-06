@@ -1470,16 +1470,34 @@ $pyjs['loaded_modules']['FallingBalls'] = function (__mod_name__) {
 				width = arguments[1];
 				height = arguments[2];
 			}
-
+			var images;
 			$m['GWTCanvas']['__init__'](self, width, height);
 			self['width'] = width;
 			self['height'] = height;
+			self['background'] = '';
 			self['resize']($p['getattr'](self, 'width'), $p['getattr'](self, 'height'));
 			self['fillRect'](0, 0, $p['getattr'](self, 'width'), $p['getattr'](self, 'height'));
+			images = $p['list'](['./images/background.bmp']);
+			$m['loadImages'](images, self);
 			return null;
 		}
 	, 1, [null,null,['self'],['width'],['height']]);
 		$cls_definition['__init__'] = $method;
+		$method = $pyjs__bind_method2('onImagesLoaded', function(imagesHandles) {
+			if (this['__is_instance__'] === true) {
+				var self = this;
+			} else {
+				var self = arguments[0];
+				imagesHandles = arguments[1];
+			}
+
+			self['background'] = imagesHandles['__getitem__'](0);
+			self['resize']($p['getattr'](self, 'width'), $p['getattr'](self, 'height'));
+			self['drawImage']($p['getattr'](self, 'background'), 0, 0);
+			return null;
+		}
+	, 1, [null,null,['self'],['imagesHandles']]);
+		$cls_definition['onImagesLoaded'] = $method;
 		var $bases = new Array($m['GWTCanvas']);
 		var $data = $p['dict']();
 		for (var $item in $cls_definition) { $data['__setitem__']($item, $cls_definition[$item]); }
@@ -1487,7 +1505,7 @@ $pyjs['loaded_modules']['FallingBalls'] = function (__mod_name__) {
 	})();
 	if ($p['bool']($p['op_eq']((typeof __name__ == "undefined"?$m['__name__']:__name__), '__main__'))) {
 		$m['pyjd']['setup']('public/FallingBalls.html');
-		$m['c'] = $m['GameCanvas'](800, 600);
+		$m['c'] = $m['GameCanvas'](500, 400);
 		$m['panel'] = $pyjs_kwargs_call(null, $m['FocusPanel'], null, null, [{'Widget':$m['c']}]);
 		$m['RootPanel']()['add']($m['panel']);
 		$m['panel']['addKeyboardListener']($m['c']);
