@@ -1776,11 +1776,17 @@ $pyjs['loaded_modules']['FallingBalls'] = function (__mod_name__) {
 
 
 	$m['pyjd'] = $p['___import___']('pyjd', null);
+	$m['DOM'] = $p['___import___']('pyjamas.DOM', null, null, false);
 	$m['GWTCanvas'] = $p['___import___']('pyjamas.Canvas.GWTCanvas.GWTCanvas', null, null, false);
 	$m['FocusPanel'] = $p['___import___']('pyjamas.ui.FocusPanel.FocusPanel', null, null, false);
 	$m['RootPanel'] = $p['___import___']('pyjamas.ui.RootPanel.RootPanel', null, null, false);
+	$m['RootPanelCls'] = $p['___import___']('pyjamas.ui.RootPanel.RootPanelCls', null, null, false);
 	$m['Color'] = $p['___import___']('pyjamas.Canvas.Color', null, null, false);
 	$m['loadImages'] = $p['___import___']('pyjamas.Canvas.ImageLoader.loadImages', null, null, false);
+	$m['ClickHandler'] = $p['___import___']('pyjamas.ui.ClickListener.ClickHandler', null, null, false);
+	$m['KeyboardHandler'] = $p['___import___']('pyjamas.ui.KeyboardListener.KeyboardHandler', null, null, false);
+	$m['Event'] = $p['___import___']('pyjamas.ui.Event', null, null, false);
+	$m['Timer'] = $p['___import___']('pyjamas.Timer.Timer', null, null, false);
 	$m['GameCanvas'] = (function(){
 		var $cls_definition = new Object();
 		var $method;
@@ -1798,10 +1804,12 @@ $pyjs['loaded_modules']['FallingBalls'] = function (__mod_name__) {
 			self['width'] = width;
 			self['height'] = height;
 			self['background'] = '';
-			self['resize']($p['getattr'](self, 'width'), $p['getattr'](self, 'height'));
-			self['fillRect'](0, 0, $p['getattr'](self, 'width'), $p['getattr'](self, 'height'));
-			images = $p['list'](['./images/background.bmp']);
+			self['ball'] = '';
+			self['game'] = (typeof Game == "undefined"?$m['Game']:Game)(width, height);
+			self['controller'] = (typeof Controller == "undefined"?$m['Controller']:Controller)($p['getattr'](self, 'game'));
+			images = $p['list'](['./images/background.png', './images/ball.png']);
 			$m['loadImages'](images, self);
+			self['sinkEvents']($p['getattr']($m['Event'], 'KEYEVENTS'));
 			return null;
 		}
 	, 1, [null,null,['self'],['width'],['height']]);
@@ -1815,16 +1823,381 @@ $pyjs['loaded_modules']['FallingBalls'] = function (__mod_name__) {
 			}
 
 			self['background'] = imagesHandles['__getitem__'](0);
+			self['ball'] = imagesHandles['__getitem__'](1);
 			self['resize']($p['getattr'](self, 'width'), $p['getattr'](self, 'height'));
 			self['drawImage']($p['getattr'](self, 'background'), 0, 0);
+			self['controller']['startGame'](self);
 			return null;
 		}
 	, 1, [null,null,['self'],['imagesHandles']]);
 		$cls_definition['onImagesLoaded'] = $method;
+		$method = $pyjs__bind_method2('addTo', function(panel) {
+			if (this['__is_instance__'] === true) {
+				var self = this;
+			} else {
+				var self = arguments[0];
+				panel = arguments[1];
+			}
+
+			panel['add'](self);
+			self['top'] = $m['DOM']['getAbsoluteTop'](self['getElement']());
+			self['left'] = $m['DOM']['getAbsoluteLeft'](self['getElement']());
+			return null;
+		}
+	, 1, [null,null,['self'],['panel']]);
+		$cls_definition['addTo'] = $method;
+		$method = $pyjs__bind_method2('setKey', function(k, set) {
+			if (this['__is_instance__'] === true) {
+				var self = this;
+			} else {
+				var self = arguments[0];
+				k = arguments[1];
+				set = arguments[2];
+			}
+
+			$m['DOM']['eventPreventDefault']($m['DOM']['eventGetCurrentEvent']());
+			if ($p['bool']($p['op_eq'](k, 39))) {
+				$p['getattr'](self, 'controller')['keyLeft'] = set;
+			}
+			else if ($p['bool']($p['op_eq'](k, 37))) {
+				$p['getattr'](self, 'controller')['keyRight'] = set;
+			}
+			return null;
+		}
+	, 1, [null,null,['self'],['k'],['set']]);
+		$cls_definition['setKey'] = $method;
+		$method = $pyjs__bind_method2('onKeyDown', function(sender, keyCode, modifiers) {
+			if (this['__is_instance__'] === true) {
+				var self = this;
+			} else {
+				var self = arguments[0];
+				sender = arguments[1];
+				keyCode = arguments[2];
+				modifiers = arguments[3];
+			}
+			if (typeof modifiers == 'undefined') modifiers=arguments['callee']['__args__'][5][1];
+
+			self['setKey'](keyCode, true);
+			return null;
+		}
+	, 1, [null,null,['self'],['sender'],['keyCode'],['modifiers', null]]);
+		$cls_definition['onKeyDown'] = $method;
+		$method = $pyjs__bind_method2('onKeyUp', function(sender, keyCode, modifiers) {
+			if (this['__is_instance__'] === true) {
+				var self = this;
+			} else {
+				var self = arguments[0];
+				sender = arguments[1];
+				keyCode = arguments[2];
+				modifiers = arguments[3];
+			}
+			if (typeof modifiers == 'undefined') modifiers=arguments['callee']['__args__'][5][1];
+
+			self['setKey'](keyCode, false);
+			return null;
+		}
+	, 1, [null,null,['self'],['sender'],['keyCode'],['modifiers', null]]);
+		$cls_definition['onKeyUp'] = $method;
+		$method = $pyjs__bind_method2('drawBall', function(ball) {
+			if (this['__is_instance__'] === true) {
+				var self = this;
+			} else {
+				var self = arguments[0];
+				ball = arguments[1];
+			}
+
+			self['saveContext']();
+			self['translate']($p['getattr'](ball, 'x'), $p['getattr'](ball, 'y'));
+			self['drawImage']($p['getattr'](self, 'ball'), 0, 0);
+			self['restoreContext']();
+			return null;
+		}
+	, 1, [null,null,['self'],['ball']]);
+		$cls_definition['drawBall'] = $method;
+		$method = $pyjs__bind_method2('drawElements', function() {
+			if (this['__is_instance__'] === true) {
+				var self = this;
+			} else {
+				var self = arguments[0];
+			}
+
+			self['fillRect'](0, 0, $p['getattr'](self, 'width'), $p['getattr'](self, 'height'));
+			self['drawImage']($p['getattr'](self, 'background'), 0, 0);
+			self['drawBall']($p['getattr']($p['getattr'](self, 'game'), 'ball'));
+			return null;
+		}
+	, 1, [null,null,['self']]);
+		$cls_definition['drawElements'] = $method;
 		var $bases = new Array($m['GWTCanvas']);
 		var $data = $p['dict']();
 		for (var $item in $cls_definition) { $data['__setitem__']($item, $cls_definition[$item]); }
 		return $p['_create_class']('GameCanvas', $p['tuple']($bases), $data);
+	})();
+	$m['Ball'] = (function(){
+		var $cls_definition = new Object();
+		var $method;
+		$cls_definition['__module__'] = 'FallingBalls';
+		$method = $pyjs__bind_method2('__init__', function(x, y) {
+			if (this['__is_instance__'] === true) {
+				var self = this;
+			} else {
+				var self = arguments[0];
+				x = arguments[1];
+				y = arguments[2];
+			}
+
+			self['x'] = x;
+			self['y'] = y;
+			self['dx'] = 0;
+			self['speed'] = 10;
+			return null;
+		}
+	, 1, [null,null,['self'],['x'],['y']]);
+		$cls_definition['__init__'] = $method;
+		$method = $pyjs__bind_method2('moveLeft', function() {
+			if (this['__is_instance__'] === true) {
+				var self = this;
+			} else {
+				var self = arguments[0];
+			}
+
+			self['dx'] = $p['getattr'](self, 'speed');
+			return null;
+		}
+	, 1, [null,null,['self']]);
+		$cls_definition['moveLeft'] = $method;
+		$method = $pyjs__bind_method2('moveRight', function() {
+			if (this['__is_instance__'] === true) {
+				var self = this;
+			} else {
+				var self = arguments[0];
+			}
+
+			self['dx'] = (typeof ($usub1=$p['getattr'](self, 'speed'))=='number'?
+				-$usub1:
+				$p['op_usub']($usub1));
+			return null;
+		}
+	, 1, [null,null,['self']]);
+		$cls_definition['moveRight'] = $method;
+		$method = $pyjs__bind_method2('move', function() {
+			if (this['__is_instance__'] === true) {
+				var self = this;
+			} else {
+				var self = arguments[0];
+			}
+			var $add2,$add1,$or1,$or2;
+			self['x'] = $p['__op_add']($add1=$p['getattr'](self, 'x'),$add2=$p['getattr'](self, 'dx'));
+			if ($p['bool'](($p['bool']($or1=($p['cmp']($p['getattr'](self, 'x'), 0) == -1))?$or1:($p['cmp']($p['getattr'](self, 'x'), 470) == 1)))) {
+				self['dx'] = (typeof ($usub2=$p['getattr'](self, 'dx'))=='number'?
+					-$usub2:
+					$p['op_usub']($usub2));
+			}
+			return null;
+		}
+	, 1, [null,null,['self']]);
+		$cls_definition['move'] = $method;
+		var $bases = new Array(pyjslib['object']);
+		var $data = $p['dict']();
+		for (var $item in $cls_definition) { $data['__setitem__']($item, $cls_definition[$item]); }
+		return $p['_create_class']('Ball', $p['tuple']($bases), $data);
+	})();
+	$m['Game'] = (function(){
+		var $cls_definition = new Object();
+		var $method;
+		$cls_definition['__module__'] = 'FallingBalls';
+		$method = $pyjs__bind_method2('__init__', function(x, y) {
+			if (this['__is_instance__'] === true) {
+				var self = this;
+			} else {
+				var self = arguments[0];
+				x = arguments[1];
+				y = arguments[2];
+			}
+
+			self['x'] = x;
+			self['y'] = y;
+			self['ball'] = $m['Ball'](235, 322);
+			self['canvas'] = '';
+			return null;
+		}
+	, 1, [null,null,['self'],['x'],['y']]);
+		$cls_definition['__init__'] = $method;
+		$method = $pyjs__bind_method2('startGame', function(canvas) {
+			if (this['__is_instance__'] === true) {
+				var self = this;
+			} else {
+				var self = arguments[0];
+				canvas = arguments[1];
+			}
+
+			self['canvas'] = canvas;
+			return null;
+		}
+	, 1, [null,null,['self'],['canvas']]);
+		$cls_definition['startGame'] = $method;
+		$method = $pyjs__bind_method2('update', function() {
+			if (this['__is_instance__'] === true) {
+				var self = this;
+			} else {
+				var self = arguments[0];
+			}
+
+			self['ball']['move']();
+			self['canvas']['drawElements']();
+			return null;
+		}
+	, 1, [null,null,['self']]);
+		$cls_definition['update'] = $method;
+		var $bases = new Array(pyjslib['object']);
+		var $data = $p['dict']();
+		for (var $item in $cls_definition) { $data['__setitem__']($item, $cls_definition[$item]); }
+		return $p['_create_class']('Game', $p['tuple']($bases), $data);
+	})();
+	$m['Controller'] = (function(){
+		var $cls_definition = new Object();
+		var $method;
+		$cls_definition['__module__'] = 'FallingBalls';
+		$method = $pyjs__bind_method2('__init__', function(game) {
+			if (this['__is_instance__'] === true) {
+				var self = this;
+			} else {
+				var self = arguments[0];
+				game = arguments[1];
+			}
+
+			self['game'] = game;
+			self['keyLeft'] = false;
+			self['keyRight'] = false;
+			return null;
+		}
+	, 1, [null,null,['self'],['game']]);
+		$cls_definition['__init__'] = $method;
+		$method = $pyjs__bind_method2('startGame', function(canvas) {
+			if (this['__is_instance__'] === true) {
+				var self = this;
+			} else {
+				var self = arguments[0];
+				canvas = arguments[1];
+			}
+
+			self['canvas'] = canvas;
+			self['game']['startGame'](canvas);
+			self['timer'] = $pyjs_kwargs_call(null, $m['Timer'], null, null, [{'notify':$p['getattr'](self, 'update')}]);
+			self['timer']['scheduleRepeating'](35);
+			return null;
+		}
+	, 1, [null,null,['self'],['canvas']]);
+		$cls_definition['startGame'] = $method;
+		$method = $pyjs__bind_method2('update', function() {
+			if (this['__is_instance__'] === true) {
+				var self = this;
+			} else {
+				var self = arguments[0];
+			}
+
+			self['pressedKey']();
+			self['game']['update']();
+			return null;
+		}
+	, 1, [null,null,['self']]);
+		$cls_definition['update'] = $method;
+		$method = $pyjs__bind_method2('pressedKey', function() {
+			if (this['__is_instance__'] === true) {
+				var self = this;
+			} else {
+				var self = arguments[0];
+			}
+			var ball;
+			ball = $p['getattr']($p['getattr'](self, 'game'), 'ball');
+			if ($p['bool']($p['getattr'](self, 'keyLeft'))) {
+				ball['moveLeft']();
+			}
+			if ($p['bool']($p['getattr'](self, 'keyRight'))) {
+				ball['moveRight']();
+			}
+			return null;
+		}
+	, 1, [null,null,['self']]);
+		$cls_definition['pressedKey'] = $method;
+		var $bases = new Array(pyjslib['object']);
+		var $data = $p['dict']();
+		for (var $item in $cls_definition) { $data['__setitem__']($item, $cls_definition[$item]); }
+		return $p['_create_class']('Controller', $p['tuple']($bases), $data);
+	})();
+	$m['RootPanelListener'] = (function(){
+		var $cls_definition = new Object();
+		var $method;
+		$cls_definition['__module__'] = 'FallingBalls';
+		$method = $pyjs__bind_method2('__init__', function(Parent) {
+			if (this['__is_instance__'] === true) {
+				var self = this;
+				var args = $p['tuple']($pyjs_array_slice['call'](arguments,1,arguments['length']-1));
+
+				var kwargs = arguments['length'] >= 2 ? arguments[arguments['length']-1] : arguments[arguments['length']];
+				if (kwargs === null || typeof kwargs != 'object' || kwargs['__name__'] != 'dict' || typeof kwargs['$pyjs_is_kwarg'] == 'undefined') {
+					if (typeof kwargs != 'undefined') args['__array']['push'](kwargs);
+					var kwargs = arguments[arguments['length']+1];
+				} else {
+					delete kwargs['$pyjs_is_kwarg'];
+				}
+			} else {
+				var self = arguments[0];
+				Parent = arguments[1];
+				var args = $p['tuple']($pyjs_array_slice['call'](arguments,2,arguments['length']-1));
+
+				var kwargs = arguments['length'] >= 3 ? arguments[arguments['length']-1] : arguments[arguments['length']];
+				if (kwargs === null || typeof kwargs != 'object' || kwargs['__name__'] != 'dict' || typeof kwargs['$pyjs_is_kwarg'] == 'undefined') {
+					if (typeof kwargs != 'undefined') args['__array']['push'](kwargs);
+					kwargs = arguments[arguments['length']+1];
+				} else {
+					delete kwargs['$pyjs_is_kwarg'];
+				}
+			}
+			if (typeof kwargs == 'undefined') {
+				kwargs = $p['__empty_dict']();
+				if (typeof Parent != 'undefined') {
+					if (Parent !== null && typeof Parent['$pyjs_is_kwarg'] != 'undefined') {
+						kwargs = Parent;
+						Parent = arguments[2];
+					}
+				} else 				if (typeof self != 'undefined') {
+					if (self !== null && typeof self['$pyjs_is_kwarg'] != 'undefined') {
+						kwargs = self;
+						self = arguments[2];
+					}
+				} else {
+				}
+			}
+
+			self['Parent'] = Parent;
+			self['focussed'] = false;
+			$pyjs_kwargs_call($m['RootPanelCls'], '__init__', args, kwargs, [{}, self]);
+			$m['ClickHandler']['__init__'](self);
+			$m['KeyboardHandler']['__init__'](self);
+			self['addClickListener'](self);
+			return null;
+		}
+	, 1, ['args',['kwargs'],['self'],['Parent']]);
+		$cls_definition['__init__'] = $method;
+		$method = $pyjs__bind_method2('onClick', function(Sender) {
+			if (this['__is_instance__'] === true) {
+				var self = this;
+			} else {
+				var self = arguments[0];
+				Sender = arguments[1];
+			}
+
+			self['focussed'] = !$p['bool']($p['getattr'](self, 'focussed'));
+			self['Parent']['setFocus']($p['getattr'](self, 'focussed'));
+			return null;
+		}
+	, 1, [null,null,['self'],['Sender']]);
+		$cls_definition['onClick'] = $method;
+		var $bases = new Array($m['RootPanelCls'],$m['KeyboardHandler'],$m['ClickHandler']);
+		var $data = $p['dict']();
+		for (var $item in $cls_definition) { $data['__setitem__']($item, $cls_definition[$item]); }
+		return $p['_create_class']('RootPanelListener', $p['tuple']($bases), $data);
 	})();
 	if ($p['bool']($p['op_eq']((typeof __name__ == "undefined"?$m['__name__']:__name__), '__main__'))) {
 		$m['pyjd']['setup']('public/FallingBalls.html');
@@ -1833,8 +2206,8 @@ $pyjs['loaded_modules']['FallingBalls'] = function (__mod_name__) {
 		$m['RootPanel']()['add']($m['panel']);
 		$m['panel']['addKeyboardListener']($m['c']);
 		$m['panel']['setFocus'](true);
+		$m['pyjd']['run']();
 	}
-	$m['pyjd']['run']();
 	return this;
 }; /* end FallingBalls */
 
@@ -1843,7 +2216,7 @@ $pyjs['loaded_modules']['FallingBalls'] = function (__mod_name__) {
 
 
 /*
-PYJS_DEPS: ['pyjd', 'pyjamas.Canvas.GWTCanvas.GWTCanvas', 'pyjamas', 'pyjamas.Canvas', 'pyjamas.Canvas.GWTCanvas', 'pyjamas.ui.FocusPanel.FocusPanel', 'pyjamas.ui', 'pyjamas.ui.FocusPanel', 'pyjamas.ui.RootPanel.RootPanel', 'pyjamas.ui.RootPanel', 'pyjamas.Canvas.Color', 'pyjamas.Canvas.ImageLoader.loadImages', 'pyjamas.Canvas.ImageLoader']
+PYJS_DEPS: ['pyjd', 'pyjamas.DOM', 'pyjamas', 'pyjamas.Canvas.GWTCanvas.GWTCanvas', 'pyjamas.Canvas', 'pyjamas.Canvas.GWTCanvas', 'pyjamas.ui.FocusPanel.FocusPanel', 'pyjamas.ui', 'pyjamas.ui.FocusPanel', 'pyjamas.ui.RootPanel.RootPanel', 'pyjamas.ui.RootPanel', 'pyjamas.ui.RootPanel.RootPanelCls', 'pyjamas.Canvas.Color', 'pyjamas.Canvas.ImageLoader.loadImages', 'pyjamas.Canvas.ImageLoader', 'pyjamas.ui.ClickListener.ClickHandler', 'pyjamas.ui.ClickListener', 'pyjamas.ui.KeyboardListener.KeyboardHandler', 'pyjamas.ui.KeyboardListener', 'pyjamas.ui.Event', 'pyjamas.Timer.Timer', 'pyjamas.Timer']
 */
 
 --></script>
@@ -4836,6 +5209,48 @@ $pyjs['loaded_modules']['pyjamas.ui.Widget'] = function (__mod_name__) {
 
 /*
 PYJS_DEPS: ['pyjamas.DOM', 'pyjamas', 'pyjamas.Factory', 'pyjamas.ui.UIObject.UIObject', 'pyjamas.ui', 'pyjamas.ui.UIObject', 'pyjamas.ui.Event', 'pyjamas.ui.ClickListener.ClickHandler', 'pyjamas.ui.ClickListener', 'pyjamas.ui.FocusListener.FocusHandler', 'pyjamas.ui.FocusListener', 'pyjamas.ui.KeyboardListener.KeyboardHandler', 'pyjamas.ui.KeyboardListener', 'pyjamas.ui.MouseListener.MouseHandler', 'pyjamas.ui.MouseListener', 'pyjamas.ui.MouseListener.MouseWheelHandler', 'pyjamas.ui.InputListener.InputHandler', 'pyjamas.ui.InputListener', 'pyjamas.ui.ChangeListener.ChangeHandler', 'pyjamas.ui.ChangeListener', 'pyjamas.ui.DragHandler.DragHandler', 'pyjamas.ui.DragHandler', 'pyjamas.ui.DropHandler.DropHandler', 'pyjamas.ui.DropHandler']
+*/
+
+--></script>
+<script type="text/javascript"><!--
+/* start module: traceback */
+$pyjs['loaded_modules']['traceback'] = function (__mod_name__) {
+	if($pyjs['loaded_modules']['traceback']['__was_initialized__']) return $pyjs['loaded_modules']['traceback'];
+	var $m = $pyjs['loaded_modules']['traceback'];
+	$m['__repr__'] = function() { return '<module: traceback>'; };
+	$m['__was_initialized__'] = true;
+	if ((__mod_name__ === null) || (typeof __mod_name__ == 'undefined')) __mod_name__ = 'traceback';
+	$m['__name__'] = __mod_name__;
+
+
+	$m['sys'] = $p['___import___']('sys', null);
+	$m['format_exception'] = function(etype, value, tb, limit) {
+		if (typeof limit == 'undefined') limit=arguments['callee']['__args__'][5][1];
+
+		return $pyjs_kwargs_call($m['sys'], '_get_traceback_list', null, null, [{'limit':limit}, value, tb]);
+	};
+	$m['format_exception']['__name__'] = 'format_exception';
+
+	$m['format_exception']['__bind_type__'] = 0;
+	$m['format_exception']['__args__'] = [null,null,['etype'],['value'],['tb'],['limit', null]];
+	$m['print_exc'] = function() {
+
+		$p['printFunc']([$m['sys']['_get_traceback_list']((typeof value == "undefined"?$m['value']:value), (typeof tb == "undefined"?$m['tb']:tb), null)], 1);
+		return null;
+	};
+	$m['print_exc']['__name__'] = 'print_exc';
+
+	$m['print_exc']['__bind_type__'] = 0;
+	$m['print_exc']['__args__'] = [null,null];
+	return this;
+}; /* end traceback */
+
+
+/* end module: traceback */
+
+
+/*
+PYJS_DEPS: ['sys']
 */
 
 --></script>
@@ -8277,6 +8692,358 @@ element['on'+event_name] = null
 
 /*
 PYJS_DEPS: ['pyjd', 'pyjamas.Window.onResize', 'pyjamas', 'pyjamas.Window', 'pyjamas.Window.onClosing', 'pyjamas.Window.onClosed', 'pyjamas.ui.Event', 'pyjamas.ui', 'pyjamas.ui.Event.ONBLUR', 'pyjamas.ui.Event.ONCHANGE', 'pyjamas.ui.Event.ONCLICK', 'pyjamas.ui.Event.ONCONTEXTMENU', 'pyjamas.ui.Event.ONDBLCLICK', 'pyjamas.ui.Event.ONERROR', 'pyjamas.ui.Event.ONFOCUS', 'pyjamas.ui.Event.ONKEYDOWN', 'pyjamas.ui.Event.ONKEYPRESS', 'pyjamas.ui.Event.ONKEYUP', 'pyjamas.ui.Event.ONLOAD', 'pyjamas.ui.Event.ONLOSECAPTURE', 'pyjamas.ui.Event.ONMOUSEDOWN', 'pyjamas.ui.Event.ONMOUSEMOVE', 'pyjamas.ui.Event.ONMOUSEOUT', 'pyjamas.ui.Event.ONMOUSEOVER', 'pyjamas.ui.Event.ONMOUSEUP', 'pyjamas.ui.Event.ONSCROLL', 'pyjamas.ui.Event.ONINPUT']
+*/
+
+--></script>
+<script type="text/javascript"><!--
+/* start module: pyjamas.Timer */
+$pyjs['loaded_modules']['pyjamas.Timer'] = function (__mod_name__) {
+	if($pyjs['loaded_modules']['pyjamas.Timer']['__was_initialized__']) return $pyjs['loaded_modules']['pyjamas.Timer'];
+	if(typeof $pyjs['loaded_modules']['pyjamas'] == 'undefined' || !$pyjs['loaded_modules']['pyjamas']['__was_initialized__']) $p['___import___']('pyjamas', null);
+	var $m = $pyjs['loaded_modules']['pyjamas.Timer'];
+	$m['__repr__'] = function() { return '<module: pyjamas.Timer>'; };
+	$m['__was_initialized__'] = true;
+	if ((__mod_name__ === null) || (typeof __mod_name__ == 'undefined')) __mod_name__ = 'pyjamas.Timer';
+	$m['__name__'] = __mod_name__;
+	$pyjs['loaded_modules']['pyjamas']['Timer'] = $pyjs['loaded_modules']['pyjamas.Timer'];
+
+
+	$m['Window'] = $p['___import___']('pyjamas.Window', 'pyjamas', null, false);
+	$m['pyjd'] = $p['___import___']('pyjd', 'pyjamas');
+	$m['print_exc'] = $p['___import___']('traceback.print_exc', 'pyjamas', null, false);
+	$m['Timer'] = (function(){
+		var $cls_definition = new Object();
+		var $method;
+		$cls_definition['__module__'] = 'pyjamas.Timer';
+		$cls_definition['__timers'] = $p['set']();
+		$cls_definition['__WindowCloseListener'] = (function(){
+			var $cls_definition = new Object();
+			var $method;
+			$cls_definition['__module__'] = 'pyjamas.Timer';
+			$method = $pyjs__bind_method2('onWindowClosed', function() {
+				if (this['__is_instance__'] === true) {
+					var self = this;
+				} else {
+					var self = arguments[0];
+				}
+				var $iter1_nextval,$iter1_type,timer,$iter1_iter,$iter1_array,$iter1_idx;
+				$iter1_iter = $p['list']($p['getattr']($m['Timer'], '__timers'));
+				$iter1_nextval=$p['__iter_prepare']($iter1_iter,false);
+				while (typeof($p['__wrapped_next']($iter1_nextval)['$nextval']) != 'undefined') {
+					timer = $iter1_nextval['$nextval'];
+					timer['cancel']();
+				}
+				return null;
+			}
+	, 1, [null,null,['self']]);
+			$cls_definition['onWindowClosed'] = $method;
+			$method = $pyjs__bind_method2('onWindowClosing', function() {
+				if (this['__is_instance__'] === true) {
+					var self = this;
+				} else {
+					var self = arguments[0];
+				}
+
+ 				return null;
+			}
+	, 1, [null,null,['self']]);
+			$cls_definition['onWindowClosing'] = $method;
+			var $bases = new Array(pyjslib['object']);
+			var $data = $p['dict']();
+			for (var $item in $cls_definition) { $data['__setitem__']($item, $cls_definition[$item]); }
+			return $p['_create_class']('__WindowCloseListener', $p['tuple']($bases), $data);
+		})();
+		$method = $pyjs__bind_method2('__init__', function(delayMillis, notify) {
+			if (this['__is_instance__'] === true) {
+				var self = this;
+			} else {
+				var self = arguments[0];
+				delayMillis = arguments[1];
+				notify = arguments[2];
+			}
+			if (typeof delayMillis == 'undefined') delayMillis=arguments['callee']['__args__'][3][1];
+			if (typeof notify == 'undefined') notify=arguments['callee']['__args__'][4][1];
+			var run,$lambda2,$lambda1;
+			self['__tid'] = null;
+			var 			$lambda1 = function() {
+
+				return self['run']();
+			};
+			$lambda1['__name__'] = '$lambda1';
+
+			$lambda1['__bind_type__'] = 0;
+			$lambda1['__args__'] = [null,null];
+			self['__onTimer'] = $lambda1;
+			$m['Window']['addWindowCloseListener']($m['Timer']['__WindowCloseListener']());
+			if ($p['bool']((notify !== null))) {
+				run = $p['getattr'](notify, 'onTimer', notify);
+				if ($p['bool'](!$p['bool']($p['callable'](run)))) {
+
+					var $pyjs__raise_expr1 = $p['ValueError'];
+					var $pyjs__raise_expr2 = 'Programming error: notify must be callable';
+					if ($pyjs__raise_expr2 !== null && $pyjs__raise_expr1['__is_instance__'] === true) {
+						throw $p['TypeError']('instance exception may not have a separate value');
+					}
+					if ($p['isinstance']($pyjs__raise_expr2, $p['tuple'])) {
+						throw ($pyjs__raise_expr1['apply']($pyjs__raise_expr1, $pyjs__raise_expr2['getArray']()));
+					} else {
+						throw ($pyjs__raise_expr1($pyjs__raise_expr2));
+					}
+
+				}
+				var 				$lambda2 = function() {
+
+					return run(self);
+				};
+				$lambda2['__name__'] = '$lambda2';
+
+				$lambda2['__bind_type__'] = 0;
+				$lambda2['__args__'] = [null,null];
+				self['__onTimer'] = $lambda2;
+			}
+			self['__impl_init_hook']();
+			if ($p['bool'](!$p['op_eq'](delayMillis, 0))) {
+				self['schedule'](delayMillis);
+			}
+			return null;
+		}
+	, 1, [null,null,['self'],['delayMillis', 0],['notify', null]]);
+		$cls_definition['__init__'] = $method;
+		$method = $pyjs__bind_method2('__impl_init_hook', function() {
+			if (this['__is_instance__'] === true) {
+				var self = this;
+			} else {
+				var self = arguments[0];
+			}
+
+ 			return null;
+		}
+	, 1, [null,null,['self']]);
+		$cls_definition['__impl_init_hook'] = $method;
+		$method = $pyjs__bind_method2('cancel', function() {
+			if (this['__is_instance__'] === true) {
+				var self = this;
+			} else {
+				var self = arguments[0];
+			}
+
+			if ($p['bool'](($p['getattr'](self, '__tid') === null))) {
+				return null;
+			}
+			if ($p['bool']($p['getattr'](self, '__is_repeating'))) {
+				self['__clearInterval']($p['getattr'](self, '__tid'));
+			}
+			else {
+				self['__clearTimeout']($p['getattr'](self, '__tid'));
+			}
+			self['__tid'] = null;
+			$m['Timer']['__timers']['discard'](self);
+			return null;
+		}
+	, 1, [null,null,['self']]);
+		$cls_definition['cancel'] = $method;
+		$method = $pyjs__bind_method2('run', function() {
+			if (this['__is_instance__'] === true) {
+				var self = this;
+			} else {
+				var self = arguments[0];
+			}
+
+
+			var $pyjs__raise_expr1 = $p['NotImplementedError'];
+			var $pyjs__raise_expr2 = 'Timer.run() must be overridden or Timer\n                                       must be instantiated with notify keyword\n                                       argument';
+			if ($pyjs__raise_expr2 !== null && $pyjs__raise_expr1['__is_instance__'] === true) {
+				throw $p['TypeError']('instance exception may not have a separate value');
+			}
+			if ($p['isinstance']($pyjs__raise_expr2, $p['tuple'])) {
+				throw ($pyjs__raise_expr1['apply']($pyjs__raise_expr1, $pyjs__raise_expr2['getArray']()));
+			} else {
+				throw ($pyjs__raise_expr1($pyjs__raise_expr2));
+			}
+
+			return null;
+		}
+	, 1, [null,null,['self']]);
+		$cls_definition['run'] = $method;
+		$method = $pyjs__bind_method2('schedule', function(delayMillis) {
+			if (this['__is_instance__'] === true) {
+				var self = this;
+			} else {
+				var self = arguments[0];
+				delayMillis = arguments[1];
+			}
+
+			if ($p['bool'](($p['cmp'](delayMillis, 0) < 1))) {
+
+				var $pyjs__raise_expr1 = $p['ValueError'];
+				var $pyjs__raise_expr2 = 'delay must be positive';
+				if ($pyjs__raise_expr2 !== null && $pyjs__raise_expr1['__is_instance__'] === true) {
+					throw $p['TypeError']('instance exception may not have a separate value');
+				}
+				if ($p['isinstance']($pyjs__raise_expr2, $p['tuple'])) {
+					throw ($pyjs__raise_expr1['apply']($pyjs__raise_expr1, $pyjs__raise_expr2['getArray']()));
+				} else {
+					throw ($pyjs__raise_expr1($pyjs__raise_expr2));
+				}
+
+			}
+			self['cancel']();
+			self['__is_repeating'] = false;
+			self['__tid'] = self['__setTimeout'](delayMillis);
+			$m['Timer']['__timers']['add'](self);
+			return null;
+		}
+	, 1, [null,null,['self'],['delayMillis']]);
+		$cls_definition['schedule'] = $method;
+		$method = $pyjs__bind_method2('scheduleRepeating', function(periodMillis) {
+			if (this['__is_instance__'] === true) {
+				var self = this;
+			} else {
+				var self = arguments[0];
+				periodMillis = arguments[1];
+			}
+
+			if ($p['bool'](($p['cmp'](periodMillis, 0) < 1))) {
+
+				var $pyjs__raise_expr1 = $p['ValueError'];
+				var $pyjs__raise_expr2 = 'period must be positive';
+				if ($pyjs__raise_expr2 !== null && $pyjs__raise_expr1['__is_instance__'] === true) {
+					throw $p['TypeError']('instance exception may not have a separate value');
+				}
+				if ($p['isinstance']($pyjs__raise_expr2, $p['tuple'])) {
+					throw ($pyjs__raise_expr1['apply']($pyjs__raise_expr1, $pyjs__raise_expr2['getArray']()));
+				} else {
+					throw ($pyjs__raise_expr1($pyjs__raise_expr2));
+				}
+
+			}
+			self['cancel']();
+			self['__is_repeating'] = true;
+			self['__tid'] = self['__setInterval'](periodMillis);
+			$m['Timer']['__timers']['add'](self);
+			return null;
+		}
+	, 1, [null,null,['self'],['periodMillis']]);
+		$cls_definition['scheduleRepeating'] = $method;
+		$method = $pyjs__bind_method2('__fire', function() {
+			if (this['__is_instance__'] === true) {
+				var self = this;
+				var args = $p['tuple']($pyjs_array_slice['call'](arguments,0,arguments['length']-1));
+
+				var kwds = arguments['length'] >= 1 ? arguments[arguments['length']-1] : arguments[arguments['length']];
+				if (kwds === null || typeof kwds != 'object' || kwds['__name__'] != 'dict' || typeof kwds['$pyjs_is_kwarg'] == 'undefined') {
+					if (typeof kwds != 'undefined') args['__array']['push'](kwds);
+					var kwds = arguments[arguments['length']+1];
+				} else {
+					delete kwds['$pyjs_is_kwarg'];
+				}
+			} else {
+				var self = arguments[0];
+				var args = $p['tuple']($pyjs_array_slice['call'](arguments,1,arguments['length']-1));
+
+				var kwds = arguments['length'] >= 2 ? arguments[arguments['length']-1] : arguments[arguments['length']];
+				if (kwds === null || typeof kwds != 'object' || kwds['__name__'] != 'dict' || typeof kwds['$pyjs_is_kwarg'] == 'undefined') {
+					if (typeof kwds != 'undefined') args['__array']['push'](kwds);
+					kwds = arguments[arguments['length']+1];
+				} else {
+					delete kwds['$pyjs_is_kwarg'];
+				}
+			}
+			if (typeof kwds == 'undefined') {
+				kwds = $p['__empty_dict']();
+				if (typeof self != 'undefined') {
+					if (self !== null && typeof self['$pyjs_is_kwarg'] != 'undefined') {
+						kwds = self;
+						self = arguments[1];
+					}
+				} else {
+				}
+			}
+
+			if ($p['bool'](!$p['bool']($p['getattr'](self, '__is_repeating')))) {
+				$m['Timer']['__timers']['discard'](self);
+			}
+			self['__onTimer']();
+			return null;
+		}
+	, 1, ['args',['kwds'],['self']]);
+		$cls_definition['__fire'] = $method;
+		$method = $pyjs__bind_method2('__setTimeout', function(delayMillis) {
+			if (this['__is_instance__'] === true) {
+				var self = this;
+			} else {
+				var self = arguments[0];
+				delayMillis = arguments[1];
+			}
+			var fire;
+			fire = $p['getattr'](self, '__fire');
+
+        return $wnd['setTimeout'](function() {
+           fire();
+          }, delayMillis);
+        
+		}
+	, 1, [null,null,['self'],['delayMillis']]);
+		$cls_definition['__setTimeout'] = $method;
+		$method = $pyjs__bind_method2('__clearTimeout', function(tid) {
+			if (this['__is_instance__'] === true) {
+				var self = this;
+			} else {
+				var self = arguments[0];
+				tid = arguments[1];
+			}
+
+
+        $wnd['clearTimeout'](tid);
+        
+		}
+	, 1, [null,null,['self'],['tid']]);
+		$cls_definition['__clearTimeout'] = $method;
+		$method = $pyjs__bind_method2('__setInterval', function(periodMillis) {
+			if (this['__is_instance__'] === true) {
+				var self = this;
+			} else {
+				var self = arguments[0];
+				periodMillis = arguments[1];
+			}
+			var fire;
+			fire = $p['getattr'](self, '__fire');
+
+        return $wnd['setInterval'](function() {
+           fire();
+          }, periodMillis);
+        
+		}
+	, 1, [null,null,['self'],['periodMillis']]);
+		$cls_definition['__setInterval'] = $method;
+		$method = $pyjs__bind_method2('__clearInterval', function(tid) {
+			if (this['__is_instance__'] === true) {
+				var self = this;
+			} else {
+				var self = arguments[0];
+				tid = arguments[1];
+			}
+
+
+        $wnd['clearInterval'](tid);
+        
+		}
+	, 1, [null,null,['self'],['tid']]);
+		$cls_definition['__clearInterval'] = $method;
+		var $bases = new Array($p['object']);
+		var $data = $p['dict']();
+		for (var $item in $cls_definition) { $data['__setitem__']($item, $cls_definition[$item]); }
+		return $p['_create_class']('Timer', $p['tuple']($bases), $data);
+	})();
+	return this;
+}; /* end pyjamas.Timer */
+
+
+/* end module: pyjamas.Timer */
+
+
+/*
+PYJS_DEPS: ['pyjamas.Window', 'pyjamas', 'pyjd', 'traceback.print_exc', 'traceback']
 */
 
 --></script>
@@ -25465,7 +26232,7 @@ function prepare_app() {
         };
         wait();
     }
-    wait_for_loading_modules(app_imported, ['pyjamas.ui','pyjamas.ui.FocusWidget','pyjamas.ui.Widget','pyjamas.Canvas.GWTCanvasImplIEConsts','pyjamas.ui.ChangeListener','pyjamas.Location','sys','pyjamas.Canvas.ImageLoader','pyjamas.Canvas.RadialGradientImplDefault','pyjamas.ui.AbsolutePanel','pyjamas.Canvas.RadialGradientImplIE6','pyjamas.Canvas.LinearGradientImplIE6','pyjamas.Canvas.GWTCanvasConsts','pyjamas.Canvas.GWTCanvas','pyjamas','pyjamas.ui.Focus','pyjamas.Canvas.GWTCanvasImplIE6','pyjamas.Canvas.Color','pyjamas.ui.MouseListener','pyjamas.ui.KeyboardListener','math','pyjamas.ui.Event','pyjamas.Canvas.PathElement','pyjamas.ui.InputListener','pyjamas.ui.DropHandler','pyjamas.Window','pyjamas.ui.Panel','pyjamas.Factory','pyjamas.Canvas.LinearGradientImplDefault','pyjd','pyjamas.Canvas.JSOStack','FallingBalls','pyjamas.ui.ClickListener','pyjamas.ui.Image','pyjamas.ui.ComplexPanel','pyjslib','pyjamas.Canvas.CanvasGradientImplDefault','pyjamas.Canvas','pyjamas.ui.SimplePanel','pyjamas.Canvas.GWTCanvasImplDefault','pyjamas.ui.RootPanel','pyjamas.ui.FocusPanel','pyjamas.Canvas.VMLContext','pyjamas.DOM','pyjamas.Canvas.CanvasGradientImplIE6','pyjamas.Canvas.ColorStop','pyjamas.EventController','pyjamas.ui.DragHandler','pyjamas.ui.UIObject','pyjamas.ui.FocusListener']);
+    wait_for_loading_modules(app_imported, ['pyjamas.Canvas.Color','pyjamas.ui','pyjamas.ui.FocusWidget','pyjamas.ui.Widget','pyjamas.Canvas.GWTCanvasImplIEConsts','pyjamas.ui.ChangeListener','pyjamas.Location','sys','pyjamas.Canvas.ImageLoader','pyjamas.Canvas.RadialGradientImplDefault','pyjamas.ui.AbsolutePanel','pyjamas.Canvas.RadialGradientImplIE6','pyjamas.Canvas.LinearGradientImplIE6','pyjamas.Canvas.GWTCanvasConsts','pyjamas.Canvas.GWTCanvas','pyjamas','pyjamas.Timer','pyjamas.Canvas.GWTCanvasImplIE6','pyjamas.ui.Focus','pyjamas.ui.MouseListener','pyjamas.ui.KeyboardListener','math','pyjamas.ui.Event','pyjamas.Canvas.PathElement','pyjamas.ui.InputListener','pyjamas.ui.DropHandler','pyjamas.Window','pyjamas.ui.Panel','pyjamas.Factory','pyjamas.Canvas.LinearGradientImplDefault','pyjamas.Canvas.GWTCanvasImplDefault','pyjd','pyjamas.Canvas.JSOStack','FallingBalls','pyjamas.ui.ClickListener','pyjamas.ui.Image','pyjamas.ui.ComplexPanel','pyjslib','pyjamas.Canvas.CanvasGradientImplDefault','pyjamas.Canvas','pyjamas.ui.SimplePanel','traceback','pyjamas.ui.RootPanel','pyjamas.ui.FocusPanel','pyjamas.Canvas.VMLContext','pyjamas.DOM','pyjamas.Canvas.CanvasGradientImplIE6','pyjamas.Canvas.ColorStop','pyjamas.EventController','pyjamas.ui.DragHandler','pyjamas.ui.UIObject','pyjamas.ui.FocusListener']);
 }
 
 function pygwtOnLoad(onLoadError, name) {
