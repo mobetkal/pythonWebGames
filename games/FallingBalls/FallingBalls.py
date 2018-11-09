@@ -9,6 +9,7 @@ from pyjamas.ui.ClickListener import ClickHandler
 from pyjamas.ui.KeyboardListener import KeyboardHandler
 from pyjamas.ui import Event
 from pyjamas.Timer import Timer
+import random
 
 class GameCanvas(GWTCanvas):
     def __init__(self, width, height):
@@ -22,13 +23,15 @@ class GameCanvas(GWTCanvas):
         # self.resize(self.width, self.height)
         # self.fillRect(0,0,self.width,self.height)       
         images = ['./images/background.png',
-                    './images/ball.png']
+                    './images/ball.png',
+                    './images/ball2.png']
         loadImages(images, self)
         self.sinkEvents(Event.KEYEVENTS)
 
     def onImagesLoaded(self, imagesHandles):
         self.background = imagesHandles[0]
         self.ball = imagesHandles[1]
+        self.opponent = imagesHandles[2]
         self.resize(self.width, self.height)
         self.drawImage(self.background, 0, 0)
         self.controller.startGame(self)
@@ -57,9 +60,17 @@ class GameCanvas(GWTCanvas):
         self.drawImage(self.ball, 0, 0)
         self.restoreContext()
 
+    def drawOpponent(self, opponent):
+        self.saveContext()
+        self.translate(opponent.x, opponent.y)
+        self.drawImage(self.opponent, 0, 0)
+        self.restoreContext()
+
     def drawElements(self):
         self.fillRect(0,0,self.width,self.height)
         self.drawImage(self.background, 0, 0)
+        for o in self.game.opponents:
+            self.drawOpponent(o)
         self.drawBall(self.game.ball)
 
 class Ball:
@@ -80,17 +91,38 @@ class Ball:
         if self.x < 0 or self.x > 470:
             self.dx=-self.dx
 
+class Opponent:
+    def __init__(self, ball):
+        self.x=random.randint(0,470)
+        self.y=-15
+        self.speed=random.randint(10,20)
+        self.ball=ball
+
+    def move(self):
+        self.y+=self.speed
+
 class Game:
     def __init__(self, x, y):
         self.x = x
         self.y = y
         self.ball = Ball(235,322)
         self.canvas = ''
+        self.counter=0
+        self.opponents=[]
 
     def startGame(self, canvas):
         self.canvas = canvas
 
     def update(self):
+        if self.counter == 10:
+            self.opponents.append(Opponent(self.ball))
+            self.counter=0
+        else:
+            self.counter+=1
+        for o in self.opponents:
+            o.move()
+            if o.y > 420:
+                self.opponents.remove(o) 
         self.ball.move()
         self.canvas.drawElements()
 
