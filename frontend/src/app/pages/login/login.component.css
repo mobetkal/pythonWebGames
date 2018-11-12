@@ -1,0 +1,44 @@
+.login-form-container {
+  padding: 4rem;
+  position: relative;
+  height: 100%;
+}
+
+.login-form {
+  min-width: 200px;
+  max-width: 400px;
+  width: 100%;
+}
+
+.login-title {
+  margin-bottom: 5rem;
+  font-weight: bold;
+}
+
+.register {
+  padding-top: 30px;
+}
+
+.signup-link {
+  color: #ee3148;
+  font-weight: bold;
+}
+
+.login-error-card {
+  margin-top: -1rem;
+  margin-bottom: 2rem;
+  padding: 0.6em;
+}
+
+.login-action {
+  margin: 3rem 0;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.progress-spinner {
+  margin-top: 5px;
+  margin-right: 15px;
+}

@@ -28,7 +28,7 @@
     <div class="float-right">
       <button mat-raised-button *ngIf="!isAuthenticated" color="primary" routerLink="/login">Login</button>
       <div class="d-inline-flex" *ngIf="isAuthenticated">
-        <span class="welcome">Hello {{ user.name }}!</span>
+        <span class="welcome">Hello <b>{{ displayName }}</b>!</span>
         <button mat-raised-button color="primary" (click)="logout()">Logout</button>
       </div>
     </div>
