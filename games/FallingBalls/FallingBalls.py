@@ -11,6 +11,8 @@ from pyjamas.ui import Event
 from pyjamas.Timer import Timer
 from pyjamas.ui.Label import Label
 from pyjamas.ui.VerticalPanel import VerticalPanel
+from pyjamas.HTTPRequest import HTTPRequest
+from pyjamas.JSONParser import JSONParser
 import random
 import math
 
@@ -114,6 +116,7 @@ class Game:
         self.opponents=[]
         self.points=0
         self.pointsBest=0
+        self.request = JsonRequest()
 
     def startGame(self, canvas):
         self.canvas = canvas
@@ -136,6 +139,7 @@ class Game:
         self.canvas.drawElements()
 
     def resetGame(self):
+        self.request.call({"user": "user", "score": self.points})
         self.ball.x=235
         self.ball.y=322
         self.ball.dx=0
@@ -184,6 +188,14 @@ class RootPanelListener(RootPanelCls, KeyboardHandler, ClickHandler):
 
 def distance(x1, y1, x2, y2):
     return math.sqrt((x1 - x2) * (x1 - x2)) + ((y1 - y2) * (y1 - y2))
+
+class JsonRequest(HTTPRequest):
+    def call(self, postData):
+        url = 'http://localhost:5000/score'
+        self.asyncPost(url, postData, self, None)
+
+    def onCompletion(self):
+        None
 
 if __name__ == '__main__':
     pyjd.setup("public/FallingBalls.html")
