@@ -1,82 +1,20 @@
-import pyjd
-from pyjamas import DOM
-from pyjamas.Canvas.GWTCanvas import GWTCanvas
-from pyjamas.ui.FocusPanel import FocusPanel
-from pyjamas.ui.RootPanel import RootPanel, RootPanelCls
-from pyjamas.Canvas import Color
-from pyjamas.Canvas.ImageLoader import loadImages
-from pyjamas.ui.ClickListener import ClickHandler
-from pyjamas.ui.KeyboardListener import KeyboardHandler
-from pyjamas.ui import Event
-from pyjamas.Timer import Timer
-from pyjamas.ui.Label import Label
-from pyjamas.ui.VerticalPanel import VerticalPanel
-from pyjamas.HTTPRequest import HTTPRequest
-from pyjamas.JSONParser import JSONParser
-import random
-import math
+from browser import window, document, timer, html, ajax
+import javascript, random, math
 
-class GameCanvas(GWTCanvas):
-    def __init__(self, width, height, label, label1):
-        GWTCanvas.__init__(self, width, height)
-        self.width = width
-        self.height = height
-        self.label = label
-        self.label1 = label1
-        self.background = ''
-        self.ball = ''
-        self.game = Game(width, height)
-        self.controller = Controller(self.game)      
-        images = ['./images/background.png',
-                    './images/ball.png',
-                    './images/ball2.png']
-        loadImages(images, self)
-        self.sinkEvents(Event.KEYEVENTS)
+gameFPS = 35
+canvas = document["stage"]
+ctx = canvas.getContext("2d")
+canvas1 = document["score"]
+ctx1 = canvas1.getContext("2d")
+imgBack = document["background"]
+imgBall = document["ball"]
+imgOpp =  document["opponent"]
 
-    def onImagesLoaded(self, imagesHandles):
-        self.background = imagesHandles[0]
-        self.ball = imagesHandles[1]
-        self.opponent = imagesHandles[2]
-        self.resize(self.width, self.height)
-        self.drawImage(self.background, 0, 0)
-        self.controller.startGame(self)
-        
-    def addTo(self, panel):
-        panel.add(self)
-        self.top = DOM.getAbsoluteTop(self.getElement())
-        self.left = DOM.getAbsoluteLeft(self.getElement())
-
-    def setKey(self, k, set):
-        DOM.eventPreventDefault(DOM.eventGetCurrentEvent())
-        if k == 39:
-            self.controller.keyLeft = set
-        elif k == 37:
-            self.controller.keyRight = set
-
-    def onKeyDown(self, sender, keyCode, modifiers = None):
-        self.setKey(keyCode, True)
-
-    def onKeyUp(self, sender, keyCode, modifiers = None):
-        self.setKey(keyCode, False)
-
-    def drawBall(self, ball):
-        self.saveContext()
-        self.translate(ball.x, ball.y)
-        self.drawImage(self.ball, 0, 0)
-        self.restoreContext()
-
-    def drawOpponent(self, opponent):
-        self.saveContext()
-        self.translate(opponent.x, opponent.y)
-        self.drawImage(self.opponent, 0, 0)
-        self.restoreContext()
-
-    def drawElements(self):
-        self.fillRect(0,0,self.width,self.height)
-        self.drawImage(self.background, 0, 0)
-        for o in self.game.opponents:
-            self.drawOpponent(o)
-        self.drawBall(self.game.ball)
+counter=0
+opponents=[]
+points=0
+pointsBest=0
+user = "user"
 
 class Ball:
     def __init__(self, x, y):
@@ -106,108 +44,86 @@ class Opponent:
     def move(self):
         self.y+=self.speed
 
-class Game:
-    def __init__(self, x, y):
-        self.x = x
-        self.y = y
-        self.ball = Ball(235,322)
-        self.canvas = ''
-        self.counter=0
-        self.opponents=[]
-        self.points=0
-        self.pointsBest=0
-        self.request = JsonRequest()
 
-    def startGame(self, canvas):
-        self.canvas = canvas
+def updateGame():
+    global counter, points
+    if counter == 10:
+        opponents.append(Opponent(ball))
+        counter=0
+        points+=1
+    else:
+        counter+=1
+    for o in opponents:
+        o.move()
+        if (distance(ball.x+15, ball.y+15, o.x+15, o.y+15)<(50)):
+            resetGame()
+        if o.y > 420:
+            opponents.remove(o) 
+    ball.move()
+    drawPoints()
+    drawElements()
 
-    def update(self):
-        if self.counter == 10:
-            self.opponents.append(Opponent(self.ball))
-            self.counter=0
-            self.points+=1
-            self.canvas.label.setText("Current score: " + str(self.points))
-        else:
-            self.counter+=1
-        for o in self.opponents:
-            o.move()
-            if (distance(self.ball.x+15, self.ball.y+15, o.x+15, o.y+15)<(50)):
-                self.resetGame()
-            if o.y > 420:
-                self.opponents.remove(o) 
-        self.ball.move()
-        self.canvas.drawElements()
+def resetGame():
+    global points, pointsBest, opponents
+    sendRequest()
+    ball.x=235
+    ball.y=322
+    ball.dx=0
+    if points>pointsBest:
+        pointsBest=points
+    points=0
+    opponents=[]
 
-    def resetGame(self):
-        self.request.call({"user": "user", "score": self.points})
-        self.ball.x=235
-        self.ball.y=322
-        self.ball.dx=0
-        if self.points>self.pointsBest:
-            self.pointsBest=self.points
-        self.points=0
-        self.canvas.label.setText("Current score: 0")
-        self.canvas.label1.setText("Best score: " + str(self.pointsBest))
-        self.opponents=[]
+def drawElements():
+    drawBackground()
+    for o in opponents:
+        drawOpponent(o)
+    drawBall()
 
-class Controller:
-    def __init__(self, game):
-        self.game=game
-        self.keyLeft = False
-        self.keyRight = False
+def drawBackground():
+    ctx.clearRect(0,0, canvas.width, canvas.height)
+    ctx.drawImage(imgBack, 0, 0)
 
-    def startGame(self, canvas):
-        self.canvas = canvas
-        self.game.startGame(canvas)  
-        self.timer = Timer(notify=self.update)
-        self.timer.scheduleRepeating(35)
+def drawOpponent(opponent):
+    ctx.save()
+    ctx.translate(opponent.x, opponent.y)
+    ctx.drawImage(imgOpp, 0, 0)
+    ctx.restore()
 
-    def update(self):
-        self.pressedKey()
-        self.game.update()
+def drawBall():
+    ctx.save()
+    ctx.translate(ball.x, ball.y)
+    ctx.drawImage(imgBall, 0, 0)
+    ctx.restore()
 
-    def pressedKey(self):
-        ball = self.game.ball
-        if self.keyLeft:
-            ball.moveLeft()
-        if self.keyRight:
-            ball.moveRight()
+def drawPoints():
+    global points, pointsBest
+    firstLine = "Current score: " + str(points)
+    secondLine = "Best score: " + str(pointsBest)
+    ctx1.font = "14px Arial"
+    ctx1.fillStyle = "black"
+    ctx1.clearRect(0,0, canvas1.width, canvas1.height)
+    ctx1.fillText(firstLine,0,30)
+    ctx1.fillText(secondLine,0,60)
 
-class RootPanelListener(RootPanelCls, KeyboardHandler, ClickHandler):
-    def __init__(self, Parent, *args, **kwargs):
-        self.Parent = Parent
-        self.focussed = False
-        RootPanelCls.__init__(self, *args, **kwargs)
-        ClickHandler.__init__(self)
-        KeyboardHandler.__init__(self)
-        self.addClickListener(self)
-
-    def onClick(self, Sender):
-        self.focussed = not self.focussed
-        self.Parent.setFocus(self.focussed)
+def sendRequest():
+    score = { "user": user, "score": points }
+    req = ajax.ajax()
+    req.open('POST', "http://localhost:5000/score", True)
+    req.send(score)
 
 def distance(x1, y1, x2, y2):
     return math.sqrt((x1 - x2) * (x1 - x2)) + ((y1 - y2) * (y1 - y2))
 
-class JsonRequest(HTTPRequest):
-    def call(self, postData):
-        url = 'http://localhost:5000/score'
-        self.asyncPost(url, postData, self, None)
+def process_keyDown(ev):
+    if(ev.keyCode == 37):
+        ball.moveRight()
+    elif( ev.keyCode == 39):
+        ball.moveLeft()     
+    ev.preventDefault()
+    
+document.bind("keydown", process_keyDown)
+    
+ball = Ball(235, 322)
 
-    def onCompletion(self):
-        None
-
-if __name__ == '__main__':
-    pyjd.setup("public/FallingBalls.html")
-    l = Label("Current score: 0")
-    l1 = Label("Best score: 0")
-    c = GameCanvas(500, 400, l, l1)
-    panel = FocusPanel(Widget=c)
-    panel1 = VerticalPanel()
-    panel1.add(l)
-    panel1.add(l1)
-    RootPanel().add(panel)
-    RootPanel().add(panel1)
-    panel.addKeyboardListener(c)
-    panel.setFocus(True)
-    pyjd.run()
+timer.set_interval(updateGame, 1000/gameFPS)
