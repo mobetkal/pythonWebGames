@@ -14,7 +14,9 @@ counter=0
 opponents=[]
 points=0
 pointsBest=0
-user = "user"
+cookie = document.cookie.split("; ")[1]
+key, user = cookie.split("=")
+tim = None
 
 class Ball:
     def __init__(self, x, y):
@@ -64,8 +66,9 @@ def updateGame():
     drawElements()
 
 def resetGame():
-    global points, pointsBest, opponents
+    global points, pointsBest, opponents, tim
     sendRequest()
+    timer.clear_interval(tim)
     ball.x=235
     ball.y=322
     ball.dx=0
@@ -106,6 +109,14 @@ def drawPoints():
     ctx1.fillText(firstLine,0,30)
     ctx1.fillText(secondLine,0,60)
 
+def drawStartInfo():
+    firstLine = "Aby zagrac nacisnij ENTER ..."
+    ctx1.font = "14px Arial"
+    ctx1.fillStyle = "black"
+    ctx1.clearRect(0,0, canvas1.width, canvas1.height)
+    ctx1.fillText(firstLine,0,30)
+    ctx1.fillText('',0,60)
+
 def sendRequest():
     score = { "user": user, "score": points }
     req = ajax.ajax()
@@ -116,14 +127,17 @@ def distance(x1, y1, x2, y2):
     return math.sqrt((x1 - x2) * (x1 - x2)) + ((y1 - y2) * (y1 - y2))
 
 def process_keyDown(ev):
+    global tim
     if(ev.keyCode == 37):
         ball.moveRight()
     elif( ev.keyCode == 39):
-        ball.moveLeft()     
+        ball.moveLeft()  
+    elif( ev.keyCode == 13):
+        tim = timer.set_interval(updateGame, 1000/gameFPS)   
     ev.preventDefault()
     
 document.bind("keydown", process_keyDown)
     
 ball = Ball(235, 322)
-
-timer.set_interval(updateGame, 1000/gameFPS)
+drawElements()
+drawStartInfo()
