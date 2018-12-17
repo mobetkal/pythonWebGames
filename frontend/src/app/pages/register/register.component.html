@@ -1,3 +1,87 @@
-<p>
-  register works!
-</p>
+<div class="container-fluid">
+  <div class="row">
+    <div class="register-form-container col-12 d-flex align-items-center justify-content-center">
+      <div class="register-form text-center">
+        <div class="register-title">
+          <h2 class="white">Create New Account</h2>
+        </div>
+
+        <div class="card border-danger register-error-card" *ngIf="registerError !== ''">
+          <div class="text-danger">
+            <p class="card-text">{{ registerError }}</p>
+          </div>
+        </div>
+
+        <form [formGroup]="signInForm" (ngSubmit)="onSubmit()">
+
+          <div class="col-md-12 d-inline-flex">
+            <mat-form-field class="full-width">
+              <input matInput required
+                     formControlName="login"
+                     placeholder="Login">
+            </mat-form-field>
+            <div class="m-auto icons" *ngIf="signInForm.controls['login'].valid">
+              <mat-icon>check</mat-icon>
+            </div>
+          </div>
+
+          <div class="col-md-12 d-inline-flex">
+            <mat-form-field class="full-width">
+              <input matInput required
+                     formControlName="firstName"
+                     placeholder="First name">
+            </mat-form-field>
+            <div class="m-auto icons" *ngIf="signInForm.controls['firstName'].valid">
+              <mat-icon>check</mat-icon>
+            </div>
+          </div>
+
+          <div class="col-md-12 d-inline-flex">
+            <mat-form-field class="full-width">
+              <input matInput required
+                     formControlName="lastName"
+                     placeholder="Last name">
+            </mat-form-field>
+            <div class="m-auto icons" *ngIf="signInForm.controls['lastName'].valid">
+              <mat-icon>check</mat-icon>
+            </div>
+          </div>
+
+          <div class="col-md-12 d-inline-flex">
+            <mat-form-field class="full-width">
+              <input matInput required
+                     formControlName="password"
+                     placeholder="Password"
+                     type="password">
+            </mat-form-field>
+            <div class="m-auto icons" *ngIf="passwordsIsCorrect()">
+              <mat-icon>check</mat-icon>
+            </div>
+          </div>
+
+          <div class="col-md-12 d-inline-flex">
+            <mat-form-field class="full-width">
+              <input matInput required
+                     formControlName="confirmPassword"
+                     placeholder="Confirm password"
+                     type="password">
+            </mat-form-field>
+            <div class="m-auto icons" *ngIf="passwordsIsCorrect()">
+              <mat-icon>check</mat-icon>
+            </div>
+          </div>
+
+          <div class="col-md-12 register-action">
+            <div class="float-right d-inline-flex">
+              <mat-spinner [diameter]="27"
+                           *ngIf="loading"
+                           class="progress-spinner"></mat-spinner>
+              <button mat-flat-button type="submit" [disabled]="loading || !(this.signInForm.valid && passwordsIsCorrect())">Sign In</button>
+            </div>
+          </div>
+
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

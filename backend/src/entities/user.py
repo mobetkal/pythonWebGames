@@ -15,13 +15,13 @@ class User(Entity, Base):
     last_name = Column(String)
     display_name = Column(String)
 
-    def __init__(self, login, password, firstName, lastName, created_by):
-        Entity.__init__(self, created_by)
+    def __init__(self, login, password, first_name, last_name):
+        Entity.__init__(self)
         self.login = login
         self.password = password
-        self.first_name = firstName
-        self.last_name = lastName
-        self.display_name = firstName + " " + lastName
+        self.first_name = first_name
+        self.last_name = last_name
+        self.display_name = first_name + " " + last_name
 
 class UserSchema(Schema):
     id = fields.Number()
