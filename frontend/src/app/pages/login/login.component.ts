@@ -13,7 +13,6 @@ import { AuthenticationService } from '../../shared/authentication/authenticatio
 export class LoginComponent implements OnInit {
   signInForm: FormGroup;
 
-  defaultLoginSuccessRedirect = '/';
   loginError = '';
   loading = false;
 
@@ -60,12 +59,8 @@ export class LoginComponent implements OnInit {
   }
 
   successRedirect(replaceState: boolean) {
-    const returnUrl = this.route.snapshot.queryParams['returnUrl'];
-    if (returnUrl) {
-      this.router.navigate([returnUrl], {replaceUrl: replaceState});
-    } else {
-      this.router.navigate([this.defaultLoginSuccessRedirect], {replaceUrl: replaceState});
-    }
+    const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '';
+    this.router.navigate([returnUrl], {replaceUrl: replaceState});
   }
 
 }

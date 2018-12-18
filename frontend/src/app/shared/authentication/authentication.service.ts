@@ -49,4 +49,22 @@ export class AuthenticationService {
     this.cookieService.delete(this.userNameCookie);
     this.router.navigate(['/login'], { queryParams: { logoutSuccess: true } });
   }
+
+  register(login: string, password: string, firstName: string, lastName: string) {
+    return this.http.post<any>(`${API_URL}/register`, {
+      login: login,
+      password: password,
+      first_name: firstName,
+      last_name: lastName
+    })
+      .pipe(map(response => {
+        if (response) {
+          // store token in cookie to keep user logged in between page refreshes
+          this.cookieService.set(this.authTokenCookie, response.auth_token);
+          this.cookieService.set(this.userNameCookie, response.display_name);
+        }
+
+        return response;
+      }));
+  }
 }
