@@ -4,6 +4,8 @@ import { TetrisComponent } from '../../games/tetris/tetris.component';
 
 import { StatisticsComponent } from '../../pages/statistics/statistics.component';
 
+import { FallingballsComponent } from 'src/app/games/fallingballs/fallingballs.component';
+
 // Routes for protected content.
 
 export const APP_PROTECTED_ROUTES: Routes = [
@@ -12,6 +14,10 @@ export const APP_PROTECTED_ROUTES: Routes = [
     path: 'tetris',
     component: TetrisComponent
   },
+{
+  path: 'fallingballs',
+  component: FallingballsComponent
+},
 
   // OTHER
   {
