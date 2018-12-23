@@ -1,11 +1,14 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { TetrisComponent } from './tetris/tetris.component';
+
+import { FallingBallsComponent } from './falling-balls/falling-balls.component';
 
 @NgModule({
   imports: [
     CommonModule
   ],
-  declarations: [TetrisComponent]
+  declarations: [
+    FallingBallsComponent
+  ]
 })
 export class GamesModule { }

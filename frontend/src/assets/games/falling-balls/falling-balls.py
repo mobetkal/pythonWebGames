@@ -110,7 +110,7 @@ def drawPoints():
     ctx1.fillText(secondLine,0,60)
 
 def drawStartInfo():
-    firstLine = "Aby zagrac nacisnij ENTER ..."
+    firstLine = "To play, press ENTER..."
     ctx1.font = "14px Arial"
     ctx1.fillStyle = "black"
     ctx1.clearRect(0,0, canvas1.width, canvas1.height)
@@ -118,9 +118,9 @@ def drawStartInfo():
     ctx1.fillText('',0,60)
 
 def sendRequest():
-    score = { "user": user, "score": points }
+    score = { "login": user, "game_name": "falling-balls", "score": points }
     req = ajax.ajax()
-    req.open('POST', "http://localhost:5000/score", True)
+    req.open('POST', "/score", True)
     req.send(score)
 
 def distance(x1, y1, x2, y2):

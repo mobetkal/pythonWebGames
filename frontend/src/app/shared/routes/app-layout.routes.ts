@@ -1,6 +1,6 @@
 import { Routes } from '@angular/router';
 
-import { TetrisComponent } from '../../games/tetris/tetris.component';
+import { FallingBallsComponent } from '../../games/falling-balls/falling-balls.component';
 
 import { StatisticsComponent } from '../../pages/statistics/statistics.component';
 
@@ -9,8 +9,8 @@ import { StatisticsComponent } from '../../pages/statistics/statistics.component
 export const APP_PROTECTED_ROUTES: Routes = [
   // GAMES
   {
-    path: 'tetris',
-    component: TetrisComponent
+    path: 'falling-balls',
+    component: FallingBallsComponent
   },
 
   // OTHER
