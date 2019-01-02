@@ -118,9 +118,10 @@ def drawStartInfo():
     ctx1.fillText('',0,60)
 
 def sendRequest():
-    score = { "login": user, "game_name": "falling-balls", "score": points }
+    score = { 'login': user, 'game_name': "falling-balls", 'points': points }
     req = ajax.ajax()
-    req.open('POST', "/score", True)
+    req.open('POST', "http://localhost:5000/score", True)
+    req.set_header('Content-Type', 'application/json')
     req.send(score)
 
 def distance(x1, y1, x2, y2):

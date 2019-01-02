@@ -53,31 +53,33 @@ $AjaxDict.open = function(self,method,url,async){
     self.$xmlhttp.open(method,url,async)
 }
 
-$AjaxDict.send = function(self,params){
-    // params can be Python dictionary or string
-    var res = ''
-    if(!params){
-        self.$xmlhttp.send();
-        return;
-    }else if(isinstance(params,str)){
-        res = params
-    }else if(isinstance(params,dict)){
-        for(var i=0, _len_i = params.$keys.length; i < _len_i;i++){
-            var key = encodeURIComponent(str(params.$keys[i]));
-            if (isinstance(params.$values[i],list)) {
-                for (j = 0; j < params.$values[i].length; j++) {
-                    res += key +'=' + encodeURIComponent(str(params.$values[i][j])) + '&'
-                }
-            } else {
-                res += key + '=' + encodeURIComponent(str(params.$values[i])) + '&'
-            }
-        }
-        res = res.substr(0,res.length-1)
-    }else{
-        throw _b_.TypeError("send() argument must be string or dictionary, not '"+str(params.__class__)+"'")
+function _js(obj) {
+  // obj is a Python object
+  if (isinstance(obj, [int, str])) return obj;
+  if (obj === None) return null;
+  if (obj === True) return true;
+  if (obj === False) return false;
+  if (isinstance(obj, float)) return obj.value;
+  if (isinstance(obj, [list, tuple])) {
+    let res = [];
+    for (let i = 0, _len_i = obj.length; i < _len_i; i++) {
+      res.push(_js(obj[i]))
     }
-    self.$xmlhttp.send(res)
+    return res
+  }
+  if (isinstance(obj, dict)) {
+    let res = {};
+    for (let i = 0, _len_i = obj.$keys.length; i < _len_i; i++) {
+      res[_js(obj.$keys[i])] = _js(obj.$values[i])
+    }
+    return res
+  }
+  throw _b_.TypeError(str(obj) + ' is not JSON serializable')
 }
+
+$AjaxDict.send = function (self, params) {
+  self.$xmlhttp.send(JSON.stringify(_js(params)))
+};
 
 $AjaxDict.set_header = function(self,key,value){
     self.$xmlhttp.setRequestHeader(key,value)
