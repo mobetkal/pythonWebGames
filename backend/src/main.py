@@ -113,3 +113,13 @@ def update_statistic():
         session.commit()
         session.close()
         return jsonify(''), 200
+
+@app.route('/stat', methods=['POST'])
+def load_statistic():
+    session = Session()
+    stat_object = session.query(Statistic).all()
+    schema = StatisticSchema(many=True)
+    stat = schema.dump(stat_object)
+
+    session.close()
+    return jsonify(stat.data), 200

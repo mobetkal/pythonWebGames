@@ -118,7 +118,7 @@ def drawStartInfo():
     ctx1.fillText('',0,60)
 
 def sendRequest():
-    score = { 'login': user, 'game_name': "falling-balls", 'points': points }
+    score = { 'login': user, 'game_name': "Falling-Balls", 'points': points }
     req = ajax.ajax()
     req.open('POST', "http://localhost:5000/score", True)
     req.set_header('Content-Type', 'application/json')
