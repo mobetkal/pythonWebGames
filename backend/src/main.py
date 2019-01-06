@@ -100,7 +100,7 @@ def update_statistic():
                 update({"points": statistic_request.data.points})
             session.commit()
             session.close()
-            return jsonify(''), 400
+            return jsonify(''), 200
         else:
             session.close()
             return jsonify(''), 200

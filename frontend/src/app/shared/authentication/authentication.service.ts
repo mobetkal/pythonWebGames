@@ -11,6 +11,7 @@ export class AuthenticationService {
 
   private authTokenCookie = 'ng-security-token';
   private userNameCookie = 'ng-security-user';
+  private displayNameCookie = 'ng-security-display';
 
   constructor(
     private http: HttpClient,
@@ -23,8 +24,12 @@ export class AuthenticationService {
     return this.cookieService.get(this.authTokenCookie);
   }
 
-  getUserName() {
+  getUserLogin() {
     return this.cookieService.get(this.userNameCookie);
+  }
+
+  getUserDisplayName() {
+    return this.cookieService.get(this.displayNameCookie);
   }
 
   isAuthenticated(): boolean {
@@ -32,12 +37,13 @@ export class AuthenticationService {
   }
 
   login(login: string, password: string) {
-    return this.http.post<any>(`${API_URL}/login`, { login: login, password: password })
+    return this.http.post<any>(`${API_URL}/login`, { login: login.toLowerCase(), password: password })
       .pipe(map(response => {
         if (response) {
           // store token in cookie to keep user logged in between page refreshes
           this.cookieService.set(this.authTokenCookie, response.auth_token);
-          this.cookieService.set(this.userNameCookie, response.display_name);
+          this.cookieService.set(this.displayNameCookie, response.display_name);
+          this.cookieService.set(this.userNameCookie, response.login);
         }
 
         return response;
@@ -52,7 +58,7 @@ export class AuthenticationService {
 
   register(login: string, password: string, firstName: string, lastName: string) {
     return this.http.post<any>(`${API_URL}/register`, {
-      login: login,
+      login: login.toLowerCase(),
       password: password,
       first_name: firstName,
       last_name: lastName
@@ -61,7 +67,8 @@ export class AuthenticationService {
         if (response) {
           // store token in cookie to keep user logged in between page refreshes
           this.cookieService.set(this.authTokenCookie, response.auth_token);
-          this.cookieService.set(this.userNameCookie, response.display_name);
+          this.cookieService.set(this.displayNameCookie, response.display_name);
+          this.cookieService.set(this.userNameCookie, response.login);
         }
 
         return response;

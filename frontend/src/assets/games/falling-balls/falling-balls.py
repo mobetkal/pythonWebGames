@@ -14,8 +14,12 @@ counter=0
 opponents=[]
 points=0
 pointsBest=0
-cookie = document.cookie.split("; ")[1]
-key, user = cookie.split("=")
+cookie = document.cookie.split("; ")
+dict = {}
+for item in cookie:
+  k, v = item.split("=")
+  dict[k]=v
+user = dict["ng-security-user"]
 tim = None
 
 class Ball:
