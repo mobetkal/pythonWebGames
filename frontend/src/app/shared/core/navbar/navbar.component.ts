@@ -20,6 +20,6 @@ export class NavbarComponent implements DoCheck {
 
   ngDoCheck() {
     this.isAuthenticated = this.authService.isAuthenticated();
-    this.displayName = this.authService.getUserName();
+    this.displayName = this.authService.getUserDisplayName();
   }
 }

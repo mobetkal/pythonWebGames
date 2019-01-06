@@ -5,9 +5,11 @@ from flask import Flask, jsonify, request
 
 from .entities.entity import Session
 from .entities.user import User, UserSchema
+from .entities.statistics import Statistic, StatisticSchema
 
 from .request.userRequest import UserRequestSchema
 from .request.registerRequest import RegisterRequestSchema
+from .request.statisticRequest import StatisticRequestSchema
 
 from .response.messageResponse import MessageResponse, MessageResponseSchema
 from .response.loginResponse import LoginResponse, LoginResponseSchema
@@ -78,3 +80,46 @@ def register():
             dump(LoginResponse(**users.data)).data
 
         return jsonify(login_success_response)
+
+@app.route('/score', methods=['POST'])
+def update_statistic():
+    statistic_request = StatisticRequestSchema(only=('login', 'game_name', 'points')). \
+        load(request.get_json())
+
+    session = Session()
+    stat_object = session.query(Statistic). \
+        filter(Statistic.login == statistic_request.data.login, Statistic.game_name == statistic_request.data.game_name). \
+        first()
+
+    stat = StatisticSchema().dump(stat_object)
+
+    if 'login' in stat.data:
+        if statistic_request.data.points > stat.data['points']:
+            session.query(Statistic). \
+                filter(Statistic.login == statistic_request.data.login, Statistic.game_name == statistic_request.data.game_name). \
+                update({"points": statistic_request.data.points})
+            session.commit()
+            session.close()
+            return jsonify(''), 200
+        else:
+            session.close()
+            return jsonify(''), 200
+    else:
+        statistic_schema = StatisticSchema(only=('login', 'game_name', 'points')). \
+            load(request.get_json())
+        statistic = Statistic(**statistic_schema.data)
+
+        session.add(statistic)
+        session.commit()
+        session.close()
+        return jsonify(''), 200
+
+@app.route('/stat', methods=['POST'])
+def load_statistic():
+    session = Session()
+    stat_object = session.query(Statistic).all()
+    schema = StatisticSchema(many=True)
+    stat = schema.dump(stat_object)
+
+    session.close()
+    return jsonify(stat.data), 200

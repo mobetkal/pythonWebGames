@@ -14,8 +14,12 @@ counter=0
 opponents=[]
 points=0
 pointsBest=0
-cookie = document.cookie.split("; ")[1]
-key, user = cookie.split("=")
+cookie = document.cookie.split("; ")
+dict = {}
+for item in cookie:
+  k, v = item.split("=")
+  dict[k]=v
+user = dict["ng-security-user"]
 tim = None
 
 class Ball:
@@ -118,9 +122,10 @@ def drawStartInfo():
     ctx1.fillText('',0,60)
 
 def sendRequest():
-    score = { "login": user, "game_name": "falling-balls", "score": points }
+    score = { 'login': user, 'game_name': "Falling-Balls", 'points': points }
     req = ajax.ajax()
-    req.open('POST', "/score", True)
+    req.open('POST', "http://localhost:5000/score", True)
+    req.set_header('Content-Type', 'application/json')
     req.send(score)
 
 def distance(x1, y1, x2, y2):

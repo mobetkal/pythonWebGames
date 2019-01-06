@@ -1,0 +1,19 @@
+.tabs {
+  width: 90%;
+  margin: 10px auto;
+}
+
+table {
+  width: 100%;
+}
+
+th.mat-sort-header-sorted {
+  color: black;
+}
+
+.mat-form-field {
+  margin-top: 20px;
+  margin-bottom: 7px;
+  font-size: 14px;
+  width: 100%;
+}

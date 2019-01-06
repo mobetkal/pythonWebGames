@@ -7,6 +7,7 @@ import { RouterModule } from '@angular/router';
 import { GamesModule } from '../games/games.module';
 
 import { CookieService } from 'ngx-cookie-service';
+import { StatisticService } from './services/statistic.service';
 
 @NgModule({
   imports: [
@@ -24,7 +25,8 @@ import { CookieService } from 'ngx-cookie-service';
     CommonModule
   ],
   providers: [
-    CookieService
+    CookieService,
+    StatisticService
   ],
   declarations: []
 })
