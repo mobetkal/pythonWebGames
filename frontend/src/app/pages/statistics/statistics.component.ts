@@ -31,13 +31,14 @@ export class StatisticsComponent implements OnInit {
     this.statisticService.getAll()
       .subscribe(value => {
         const allStatElements: StatisticElement[] = [];
+
         for (let i = 0; i < value.length; i++) {
           if (this.dataSourcePerGame.length !== 0) {
             for (let j = 0; j < this.dataSourcePerGame.length; j++) {
+              const item = new StatisticElement(0, value[i].game_name, value[i].login, value[i].points);
+              allStatElements.push(item);
               if (this.dataSourcePerGame[j].name === value[i].game_name) {
-                const item = new StatisticElement(0, value[i].game_name, value[i].login, value[i].points);
                 this.dataSourcePerGame[j].pushElement(item);
-                allStatElements.push(item);
               }
             }
           } else {
