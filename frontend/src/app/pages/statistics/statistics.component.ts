@@ -31,22 +31,32 @@ export class StatisticsComponent implements OnInit {
     this.statisticService.getAll()
       .subscribe(value => {
         const allStatElements: StatisticElement[] = [];
-
+        let flag = true;
         for (let i = 0; i < value.length; i++) {
+          const item = new StatisticElement(0, value[i].game_name, value[i].login, value[i].points);
+          const itemPerGame = new StatisticElement(0, value[i].game_name, value[i].login, value[i].points);
+          allStatElements.push(item);
           if (this.dataSourcePerGame.length !== 0) {
-            for (let j = 0; j < this.dataSourcePerGame.length; j++) {
-              const item = new StatisticElement(0, value[i].game_name, value[i].login, value[i].points);
-              allStatElements.push(item);
+            for (let j = 0; j < this.dataSourcePerGame.length; j++) {            
               if (this.dataSourcePerGame[j].name === value[i].game_name) {
-                this.dataSourcePerGame[j].pushElement(item);
+                this.dataSourcePerGame[j].pushElement(itemPerGame);
+                flag = false;
               }
             }
+            if(flag) {
+              this.dataSourcePerGame.push(new GameElement(value[i].game_name, itemPerGame));
+            }
+            flag = true;
           } else {
-            const item = new StatisticElement(0, value[i].game_name, value[i].login, value[i].points);
-            this.dataSourcePerGame.push(new GameElement(value[i].game_name, item));
-            allStatElements.push(item);
+            this.dataSourcePerGame.push(new GameElement(value[i].game_name, itemPerGame));
           }
         }
+
+        allStatElements.sort((a, b) => (a.points < b.points) ? 1 : ((b.points < a.points) ? -1 : 0));
+        for (let j = 0; j < allStatElements.length; j++) {
+          allStatElements[j].position = j + 1;
+        }
+
         for (let j = 0; j < this.dataSourcePerGame.length; j++) {
           this.dataSourcePerGame[j].statElements
             .sort((a, b) => (a.points < b.points) ? 1 : ((b.points < a.points) ? -1 : 0));
@@ -54,10 +64,7 @@ export class StatisticsComponent implements OnInit {
             this.dataSourcePerGame[j].statElements[i].position = i + 1;
           }
         }
-        allStatElements.sort((a, b) => (a.points < b.points) ? 1 : ((b.points < a.points) ? -1 : 0));
-        for (let j = 0; j < allStatElements.length; j++) {
-          allStatElements[j].position = j + 1;
-        }
+        
         this.dataSource = new MatTableDataSource<StatisticElement>(allStatElements);
         this.dataSource.sort = this.sort;
         this.dataSource.paginator = this.paginator;
