@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 
 import { FallingBallsComponent } from '../../games/falling-balls/falling-balls.component';
+import { McBirdComponent } from 'src/app/games/mc-bird/mc-bird.component';
 
 import { StatisticsComponent } from '../../pages/statistics/statistics.component';
 
@@ -11,6 +12,11 @@ export const APP_PROTECTED_ROUTES: Routes = [
   {
     path: 'falling-balls',
     component: FallingBallsComponent
+  },
+
+  {
+    path: 'mc-bird',
+    component: McBirdComponent
   },
 
   // OTHER
